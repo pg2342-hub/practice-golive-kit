@@ -73,6 +73,16 @@ def simulate(office: dict, rules: list[dict]) -> dict:
     return dict(office=office["id"], name=office["name"], weeks=weeks, flags=flags)
 
 
+def _drop_step(top: str | None) -> str:
+    if top and "Paper EOB" in top:
+        return "Check the payer's ERA enrollment date and add queue hours for keyed EOBs until it is live."
+    if top and "no ERA" in top:
+        return "Ask the payer for its current ERA payer ID, update the enrollment, and match the open deposits by hand meanwhile."
+    if top and ("fee" in top or "Paid below" in top):
+        return "Load the payer's current fee schedule and check whether the contract changed."
+    return "Find what changed for that payer this week and fix the setup before the backlog builds."
+
+
 def _flag(week, office, signal, reason, step):
     return dict(week=week, office=office, signal=signal, reason=reason, next_step=step)
 
@@ -83,7 +93,7 @@ def _flags(o, ws, planned):
     if prev and w["mode"] == "auto" and prev["mode"] == "auto" and prev["auto_rate"] - w["auto_rate"] >= 10:
         out.append(_flag(w["week"], o["id"], "Auto-post rate dropped",
                          f"Down from {prev['auto_rate']}% to {w['auto_rate']}%; most stuck lines: {w['top_stuck']}.",
-                         "Find what changed for that payer this week and fix the setup before the backlog builds."))
+                         _drop_step(w["top_stuck"])))
     elif w["mode"] == "auto" and w["week"] >= 4 and w["auto_rate"] < TARGET:
         out.append(_flag(w["week"], o["id"], "Below the auto-post target",
                          f"{w['auto_rate']}% against a {TARGET}% target; most stuck lines: {w['top_stuck']}.",

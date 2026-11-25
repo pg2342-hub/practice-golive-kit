@@ -118,6 +118,8 @@ def post_line(office: dict, rules: list[dict], line: dict, week: int | None = No
             return stuck("No rule for denied claims")
         if r["action"] == "hold_for_review":
             return held("Denied claim, held for review")
+        if not r["adjustment_type"] or r["adjustment_type"] not in adj_known:
+            return stuck("Adjustment type not set up in the PMS")
         steps.append(("write_off", line["fee"], r["adjustment_type"]))
         return {"result": "auto", "reason": None, "steps": steps}
 
@@ -129,12 +131,11 @@ def post_line(office: dict, rules: list[dict], line: dict, week: int | None = No
 
     diff = line["fee"] - line["allowed"]
     if diff > 0:
-        if payer["plan_type"] in ("PPO", "Premier"):
-            sched = office["fees"].get(payer["name"])
-            if sched is None:
-                return stuck("No fee schedule to check the allowed amount")
-            if line["allowed"] < sched[line["code"]]:
-                return stuck("Paid below the contracted fee")
+        sched = office["fees"].get(payer["name"])
+        if sched is None and payer["plan_type"] in ("PPO", "Premier"):
+            return stuck("No fee schedule to check the allowed amount")
+        if sched is not None and line["allowed"] < sched[line["code"]]:
+            return stuck("Paid below the contracted fee")
         r, clash = find_rule(rules, "contract_difference", payer)
         if clash:
             return stuck("Policy rules disagree on the contract write-off")
@@ -147,16 +148,17 @@ def post_line(office: dict, rules: list[dict], line: dict, week: int | None = No
         steps.append(("write_off", diff, r["adjustment_type"]))
 
     if line["patient"] > 0:
+        # The patient's share is always billed at posting. A small-balance write-off is a later,
+        # account-level step on what is left after the patient pays, never a write-off on the EOB line.
+        r, clash = find_rule(rules, "patient_portion", payer)
+        if r is None or clash or r["action"] != "bill_patient":
+            return stuck("No rule for the patient's share")
+        steps.append(("bill_patient", line["patient"], None))
         small, _ = find_rule(rules, "small_balance", payer, line["patient"])
         if small and small["action"] == "write_off" and small["max_amount"] is not None:
             if not small["adjustment_type"] or small["adjustment_type"] not in adj_known:
                 return stuck("Adjustment type not set up in the PMS")
-            steps.append(("write_off", line["patient"], small["adjustment_type"]))
-        else:
-            r, clash = find_rule(rules, "patient_portion", payer)
-            if r is None or clash or r["action"] != "bill_patient":
-                return stuck("No rule for the patient's share")
-            steps.append(("bill_patient", line["patient"], None))
+            steps.append(("small_balance_later", line["patient"], small["adjustment_type"]))
     steps.append(("post_payment", line["paid"], None))
     return {"result": "auto", "reason": None, "steps": steps}
 

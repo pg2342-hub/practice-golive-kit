@@ -176,7 +176,7 @@ button.tile[aria-expanded=true]{border-color:var(--ink);box-shadow:0 0 0 1.5px v
 <main>
 <div class="head">
 <h1>Practice go-live kit</h1>
-<p class="lead">Getting a dental office live on an AI billing assistant means turning its payers, fee schedules and the office manager's write-off policy into posting rules, then watching the first eight weeks closely. This kit does both for a made-up five-office group: Claude reads each policy, checks say which office can go live and who fixes what, and a weekly board flags accounts that drift.</p>
+<p class="lead">Getting a dental office live on an AI billing assistant means turning its payers, fee schedules, and the office manager's write-off policy into posting rules, then watching the first eight weeks closely. This kit does both for a made-up five-office group: Claude reads each policy, checks say which office can go live and who fixes what, and a weekly board flags accounts that drift.</p>
 <div id="previewNote"></div>
 </div>
 
@@ -231,7 +231,7 @@ button.tile[aria-expanded=true]{border-color:var(--ink);box-shadow:0 0 0 1.5px v
 
 <aside class="side" aria-label="About this build">
   <nav aria-label="On this page"><a href="#board">Readiness board</a><a href="#weeks-h">First eight weeks</a><a href="#fix-list">Fix list by owner</a><a href="#accuracy">How well it works</a><a href="#checks-h">What it checks</a></nav>
-  <div><h3>Data</h3><p>The offices, staff, fees, shares, policies and payment lines are made up and describe no real practice. Payer names and CDT procedure codes are public. The eight weeks are a simulation with the events listed under What it checks. Policy readings and owner notes are real Claude output, cached in the repo.</p></div>
+  <div><h3>Data</h3><p>The offices, staff, fees, shares, policies, and payment lines are made up and describe no real practice. Payer names and CDT procedure codes are public. The eight weeks are a simulation with the events listed under What it checks; all five offices start together to keep it simple, where the plan brings them on in waves. Deductibles are not modelled. Policy readings and owner notes are real Claude output, cached in the repo.</p></div>
   <div><h3>Run it yourself</h3><p>Python 3.10 or later, standard library only. From the repo folder:</p><pre>python3 -m kit.report as_received
 python3 -m kit.report after_fixes
 python3 -m eval.run_eval

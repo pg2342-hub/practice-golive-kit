@@ -2,7 +2,7 @@
 
 Demo page: https://pranavgudise.dev/practice-golive-kit/
 
-Getting a dental office live on an AI billing assistant comes down to two jobs. Before go-live, the office's payers, fee schedules, practice management system (PMS) and the office manager's write-off policy have to become posting rules that a machine can follow, and every gap has to land with the person who can fix it. After go-live, someone has to watch the first eight weeks closely enough to catch an account drifting before the owner notices.
+Getting a dental office live on an AI billing assistant comes down to two jobs. Before go-live, the office's payers, fee schedules, practice management system (PMS), and the office manager's write-off policy have to become posting rules that a machine can follow, and every gap has to land with the person who can fix it. After go-live, someone has to watch the first eight weeks closely enough to catch an account drifting before the owner notices.
 
 This kit does both for a made-up five-office group (Dentrix G7, Dentrix Ascend, Open Dental and Eaglesoft offices):
 
@@ -37,7 +37,7 @@ kit/intake.py    the made-up group, labelled policies, and the 16 planted proble
 kit/policy.py    Claude policy reader (prompt, JSON schema, cache)
 kit/checks.py    readiness checks, verdicts, owners
 kit/dryrun.py    one week of payment lines through the setup
-kit/health.py    first eight weeks, flags and next steps
+kit/health.py    first eight weeks, flags, and next steps
 kit/notes.py     Claude's weekly owner note, with the number check
 kit/report.py    text report
 eval/run_eval.py both evals
@@ -46,4 +46,4 @@ scripts/build_demo.py, docs/template.html   the demo page
 
 ## Data
 
-Everything is made up: offices, staff, fees, payer shares, policies and payment lines. Payer names and CDT procedure codes are public. Coinsurance by procedure class (0%, 20%, 50%) and staff minutes per exception are stated assumptions. Nothing here describes a real practice or comes from any company's systems.
+Everything is made up: offices, staff, fees, payer shares, policies, and payment lines. Payer names and CDT procedure codes are public. Coinsurance by procedure class (0%, 20%, 50%) and staff minutes per exception are stated assumptions. Deductibles are not modelled, so a patient's share is coinsurance only. The patient's share is always billed at posting; a small-balance write-off is recorded as a later account-level step, not a write-off on the EOB line. All five offices start together in the simulation to keep it simple; the plan brings them on in waves. Nothing here describes a real practice or comes from any company's systems.
