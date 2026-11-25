@@ -1,0 +1,169 @@
+{
+ "checks": {
+  "total": 16,
+  "clean_extra": [],
+  "baseline": [
+   [
+    "CED",
+    "paper_payer"
+   ],
+   [
+    "WIL",
+    "paper_payer"
+   ]
+  ],
+  "alone_caught": 16,
+  "alone_extra": 0,
+  "together_caught": 16,
+  "together_false_positives": [],
+  "alone": [
+   {
+    "plant": "PPO Write-Off adjustment type named in the policy is not set up in Dentrix",
+    "office": "OAK",
+    "expected": [
+     "adj_type_missing"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Delta Premier policy line says 'handle like we always do'",
+    "office": "OAK",
+    "expected": [
+     "no_rule_for_case",
+     "policy_open_question"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Guardian listed twice under two payer IDs",
+    "office": "OAK",
+    "expected": [
+     "duplicate_payer"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Deposit account not linked, so payments cannot be matched to the bank",
+    "office": "CED",
+    "expected": [
+     "bank_not_linked"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Small balance write-off with no dollar limit",
+    "office": "CED",
+    "expected": [
+     "policy_open_question"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Secondary insurance line with no clear rule",
+    "office": "CED",
+    "expected": [
+     "policy_open_question"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "United Concordia contracted fee schedule never sent",
+    "office": "CED",
+    "expected": [
+     "fee_schedule_missing"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "PMS sync not yet tested on Dentrix Ascend",
+    "office": "BIR",
+    "expected": [
+     "pms_sync_untested"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Guardian line says the doctor decides case by case",
+    "office": "BIR",
+    "expected": [
+     "policy_open_question"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "MetLife pays by EFT but no electronic remittance (ERA) is set up",
+    "office": "BIR",
+    "expected": [
+     "eft_without_era"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Nobody named to work the exception queue",
+    "office": "MAP",
+    "expected": [
+     "no_exception_owner"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Small balance limit given as '$5 or $10'",
+    "office": "MAP",
+    "expected": [
+     "policy_open_question"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Crown fee for Delta Dental PPO entered above the office fee",
+    "office": "MAP",
+    "expected": [
+     "fee_above_office_fee"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Policy both writes off small denials and never writes off denials",
+    "office": "MAP",
+    "expected": [
+     "policy_conflict"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Policy says 'same rules as the other offices' instead of its own rules",
+    "office": "WIL",
+    "expected": [
+     "no_rule_for_case",
+     "policy_open_question"
+    ],
+    "caught": true,
+    "extra": []
+   },
+   {
+    "plant": "Aetna plan type left blank",
+    "office": "WIL",
+    "expected": [
+     "payer_type_missing"
+    ],
+    "caught": true,
+    "extra": []
+   }
+  ]
+ },
+ "policy": null
+}

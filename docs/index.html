@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- demo-chrome --><meta name="theme-color" content="#f4f2ec"><link rel="icon" href="https://pranavgudise.dev/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="https://pranavgudise.dev/kit/demo.css"><!-- /demo-chrome -->
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Practice Go-Live Kit</title>
+<meta name="description" content="Onboarding a dental office onto an AI billing assistant: Claude reads each office's write-off policy, checks say which office can go live and who fixes what, and a weekly board flags accounts drifting in the first eight weeks.">
+<style>
+.head h1{margin:40px 0 14px}
+.head .lead{max-width:40em}
+/* the readiness board: switch, verdict, counts, unit tiles, unit detail */
+.board{margin:32px 0 0;border:1px solid var(--rule);border-radius:16px;background:#fbfaf6;overflow:hidden;scroll-margin-top:24px}
+.bar-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:16px 24px;border-bottom:1px solid var(--rule)}
+.seg{display:flex;width:fit-content;max-width:100%;gap:2px;padding:3px;border:1px solid var(--rule);border-radius:999px;background:var(--paper)}
+.seg button{min-height:38px;padding:0 18px;border:0;border-radius:999px;background:transparent;color:var(--ink-2);font:500 15px/1 var(--sans);cursor:pointer;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-checked=true]{background:var(--ink);color:var(--paper)}
+.cap{margin:0;color:var(--ink-2);font-size:15px}
+.vline{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 24px;align-items:center;padding:22px 24px 6px}
+.vline h2{all:unset;display:block;font:400 34px/1.1 var(--serif)}
+.vline p{grid-column:1/-1;margin:0;font-size:17px;max-width:46em}
+.gate{justify-self:end;display:inline-flex;align-items:center;min-height:34px;padding:0 16px;border-radius:999px;font:500 13px/1 var(--mono);letter-spacing:.06em;white-space:nowrap}
+.gate.nogo{background:var(--ink);color:var(--paper)}
+.gate.go{background:var(--green-wash);color:var(--green)}
+.tally{padding:18px 24px 22px}
+.stack{display:flex;gap:4px;height:22px}
+.stack i{flex:1 1 0;border-radius:4px;transition:background-color .3s var(--ease)}
+.k-NO-GO{background:var(--ink)}
+.k-GO-WITH-FIXES{background:repeating-linear-gradient(135deg,var(--ink) 0 1.5px,transparent 1.5px 6px);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.k-GO{background:var(--green)}
+.counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:14px}
+.counts div{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:10px;align-items:baseline}
+.counts b{grid-row:span 2;font:400 36px/1 var(--serif)}
+.counts .lab{display:flex;align-items:center;gap:8px;font:500 13px/1.3 var(--mono);letter-spacing:.04em}
+.counts .lab i{width:12px;height:12px;border-radius:3px;flex:none}
+.counts span:last-child{color:var(--ink-2);font-size:14px;line-height:1.35}
+.counts .zero b{color:var(--ink-2)}
+.campuses{border-top:1px solid var(--rule);padding:6px 24px 22px}
+.campus h3{display:flex;align-items:baseline;gap:10px;margin:18px 0 10px;font:400 20px/1.2 var(--serif)}
+.campus h3 span{font:400 13px/1 var(--mono);color:var(--ink-2)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(186px,1fr));gap:10px}
+button.tile{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;min-height:0;padding:0 14px 12px;border:1px solid var(--rule);border-radius:12px;background:var(--paper);color:var(--ink);text-align:left;font:inherit;font-weight:400;overflow:hidden;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s var(--ease)}
+button.tile::before{content:"";display:block;height:5px;margin:0 -14px 4px}
+button.tile.t-NO-GO::before{background:var(--ink)}
+button.tile.t-GO-WITH-FIXES::before{background:repeating-linear-gradient(90deg,var(--ink) 0 8px,transparent 8px 12px)}
+button.tile.t-GO::before{background:var(--green)}
+button.tile:hover{border-color:var(--ink);transform:translateY(-2px)}
+button.tile[aria-expanded=true]{border-color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
+.tile .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tile .code{font:400 12.5px/1 var(--mono);color:var(--ink-2)}
+.tile .name{font:400 18px/1.2 var(--serif);min-height:2.4em}
+.tile .nums{margin-top:auto;display:flex;gap:16px;font-size:13px;color:var(--ink-2)}
+.tile .nums b{font:400 22px/1 var(--serif);color:var(--ink);margin-right:5px}
+.tile .nums .z b{color:var(--ink-2)}
+.badge.fixes{border-style:dashed}
+.badge{min-height:24px;padding:0 10px;font-size:11.5px}
+.detail{border-top:1px solid var(--rule);padding:18px 24px 20px;background:var(--paper)}
+.detail h3{margin:0 0 4px;font:400 22px/1.2 var(--serif)}
+.detail .hint{margin:0;color:var(--ink-2);font-size:15px}
+.probs{list-style:none;margin:10px 0 0;padding:0}
+.probs li{display:grid;grid-template-columns:6.5em minmax(0,1fr) 11em;gap:6px 16px;align-items:baseline;margin:0;padding:10px 0;border-top:1px solid var(--rule-soft)}
+.probs li:first-child{border-top:0}
+.probs .own{color:var(--ink-2);font-size:14px}
+.sev{display:inline-flex;align-items:center;justify-self:start;min-height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--rule);font:500 11.5px/1 var(--mono);letter-spacing:.03em}
+.sev.blocking{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.sev.warning{border:1px dashed var(--ink);color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 20px;padding:12px 24px;border-top:1px solid var(--rule);color:var(--ink-2);font-size:13px}
+/* page body: content and a side column */
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:56px;align-items:start}
+.content h2{scroll-margin-top:24px}
+.side{position:sticky;top:24px;margin-top:64px;display:grid;gap:22px;font-size:14px;color:var(--ink-2)}
+.side h3{margin:0 0 6px;font:500 13px/1.3 var(--sans);color:var(--ink)}
+.side p{margin:0}
+.side nav a{display:block;padding:5px 0;color:var(--ink-2);text-decoration:none;border-bottom:1px solid var(--rule-soft)}
+.side nav a:hover{color:var(--ink)}
+.side pre{font-size:12px;margin:6px 0 0}
+.note{color:var(--ink-2);font-size:15px;max-width:44em;margin-top:14px}
+/* fix list: one card per owning team */
+.fixsum{margin:0 0 16px;font-size:17px}
+.team{border:1px solid var(--rule);border-radius:16px;background:#fbfaf6;margin:0 0 12px;overflow:hidden}
+.team-h{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;padding:14px 20px;border-bottom:1px solid var(--rule)}
+.team-h h3{margin:0;font:400 21px/1.2 var(--serif)}
+.team-h p{margin:0;display:flex;gap:14px;font-size:14px;color:var(--ink-2)}
+.team-h p b{font:400 20px/1 var(--serif);color:var(--ink);margin-right:4px}
+.todo{list-style:none;margin:0;padding:0 20px}
+.todo li{display:grid;grid-template-columns:6.5em 7.5em minmax(0,1fr);gap:4px 12px;align-items:baseline;margin:0;padding:11px 0;border-top:1px solid var(--rule-soft)}
+.todo li:first-child{border-top:0}
+.todo .u{font:400 13px/1.4 var(--mono);color:var(--ink-2)}
+.done{border:1px solid var(--rule);border-radius:16px;background:var(--green-wash);color:var(--green);padding:16px 20px;font-size:17px;margin:0}
+/* eval scorecard */
+.score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--rule);border-radius:16px;background:#fbfaf6;overflow:hidden}
+.score div{padding:18px 20px;font-size:14px;color:var(--ink-2);line-height:1.4}
+.score div+div{border-left:1px solid var(--rule)}
+.score b{display:block;font:400 34px/1.1 var(--serif);color:var(--ink);margin-bottom:6px}
+.score b small{font-size:20px;color:var(--ink-2)}
+#issues{margin-top:8px}
+@media (max-width:1000px){
+ .layout{grid-template-columns:minmax(0,1fr);gap:0}
+ .side{position:static;margin-top:48px}
+ .score{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .score div:nth-child(3){border-left:0}
+ .score div:nth-child(n+3){border-top:1px solid var(--rule)}
+}
+@media (max-width:700px){
+ .bar-top,.vline,.tally,.campuses,.detail,.legend{padding-left:16px;padding-right:16px}
+ .vline h2{font-size:28px}
+ .vline p{font-size:16px}
+ .counts{grid-template-columns:1fr;gap:10px}
+ .counts b{font-size:30px;min-width:1.1em}
+ .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ button.tile{padding:0 11px 10px}
+ button.tile::before{margin:0 -11px 2px}
+ .tile .name{font-size:16px}
+ .tile .top{flex-wrap:wrap}
+ .tile .nums{flex-wrap:wrap;gap:2px 10px;font-size:12.5px}
+ .tile .nums b{font-size:20px;margin-right:4px}
+ .probs li{grid-template-columns:5.8em minmax(0,1fr);gap:4px 10px}
+ .probs .own{grid-column:2}
+ .team-h,.todo{padding-left:16px;padding-right:16px}
+ .todo li{grid-template-columns:5.8em minmax(0,1fr)}
+ .todo .msg{grid-column:1/-1}
+ .seg button{padding:0 14px;font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){button.tile,.stack i{transition:none}}
+
+
+/* page-specific */
+.tile .pms{font:400 13px/1.35 var(--sans);color:var(--ink-2);margin-top:3px}
+.dbar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--rule-soft)}
+.dbar i{display:block;height:100%}
+.dbar .a{background:var(--green)}
+.dbar .h{background:repeating-linear-gradient(135deg,var(--ink-2) 0 1.5px,transparent 1.5px 5px)}
+.dbar .s{background:var(--ink)}
+.tile .dry{font-size:13px;color:var(--ink-2);display:grid;gap:5px}
+.tile .dry b{font:400 18px/1 var(--serif);color:var(--ink);margin-right:4px}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;margin-top:14px}
+.dgrid h4{margin:0 0 8px;font:500 13px/1.3 var(--sans)}
+.reasons{list-style:none;margin:0;padding:0;font-size:14px}
+.reasons li{display:grid;grid-template-columns:3.2em minmax(0,1fr);gap:8px;padding:6px 0;border-top:1px solid var(--rule-soft)}
+.reasons li:first-child{border-top:0}
+.reasons .c{font:400 18px/1.1 var(--serif);text-align:right}
+.reasons .k{font:500 11.5px/1 var(--mono);color:var(--ink-2);margin-left:6px}
+.pol{list-style:none;margin:0;padding:0;font-size:14px}
+.pol li{display:grid;grid-template-columns:1.6em minmax(0,1fr);gap:4px 10px;padding:8px 0;border-top:1px solid var(--rule-soft)}
+.pol li:first-child{border-top:0}
+.pol .ln{font:400 12.5px/1.5 var(--mono);color:var(--ink-2)}
+.pol .rd{grid-column:2;color:var(--ink-2);font-size:13.5px;display:flex;gap:8px;align-items:baseline}
+.pol .rd .kd{flex:none;font:500 11px/1 var(--mono);padding:4px 7px;border-radius:999px;border:1px solid var(--rule)}
+.pol .rd .kd.question{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pol .rd .kd.rule{background:var(--green-wash);color:var(--green);border-color:transparent}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.legend .a{background:var(--green)}.legend .h{background:repeating-linear-gradient(135deg,var(--ink-2) 0 1.5px,transparent 1.5px 5px);box-shadow:inset 0 0 0 1px var(--ink-2)}.legend .s{background:var(--ink)}
+/* eight-week chart */
+.weeks{border:1px solid var(--rule);border-radius:16px;background:#fbfaf6;padding:18px 20px 10px}
+.mult{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px 22px}
+.mult figure{margin:0}
+.mult figcaption{font:400 17px/1.2 var(--serif);color:var(--ink);margin:0 0 4px}
+.mult svg{width:100%;height:auto;display:block;overflow:visible}
+.mult text{font:400 10px var(--mono);fill:var(--ink-2)}
+.wkey{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink-2);margin-top:10px}
+.wkey span{display:inline-flex;align-items:center;gap:6px}
+.flags td{vertical-align:top}
+.flags .sig{font-weight:500}
+.notebox{border:1px solid var(--rule);border-radius:16px;background:var(--paper);padding:16px 20px;margin-top:12px}
+.notebox p{margin:0;font-size:16px;max-width:44em}
+.notebox .src{margin-top:8px;font-size:13px;color:var(--ink-2)}
+.preview{border:1px dashed var(--ink);border-radius:12px;padding:10px 14px;margin:18px 0 0;font-size:14px}
+.score{grid-template-columns:repeat(3,minmax(0,1fr))}
+.score div:nth-child(4){border-left:0}
+.score div:nth-child(n+4){border-top:1px solid var(--rule)}
+@media (max-width:1000px){.dgrid{grid-template-columns:1fr}}
+@media (max-width:700px){.mult{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.score{grid-template-columns:1fr}.score div{border-left:0!important;border-top:1px solid var(--rule)}.score div:first-child{border-top:0}.weeks{padding:14px}}
+</style>
+</head>
+<body>
+<!-- demo-chrome --><header class="demo-top"><a class="demo-brand" href="https://pranavgudise.dev/"><svg class="demo-mark" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.25"/><g class="n"><path class="f" d="M15.5 8.5 L 13.4 13.4 L 8.5 15.5 L 10.6 10.6 Z"/></g><circle class="p" cx="12" cy="12" r=".7"/></svg><span>Pranav Gudise</span></a><a class="pill" href="https://github.com/pg2342-hub/practice-golive-kit">Code on GitHub</a></header><!-- /demo-chrome -->
+
+<main>
+<div class="head">
+<h1>Practice go-live kit</h1>
+<p class="lead">Getting a dental office live on an AI billing assistant means turning its payers, fee schedules and the office manager's write-off policy into posting rules, then watching the first eight weeks closely. This kit does both for a made-up five-office group: Claude reads each policy, checks say which office can go live and who fixes what, and a weekly board flags accounts that drift.</p>
+<div id="previewNote"></div>
+</div>
+
+<section class="board" id="board" aria-labelledby="verdict-h">
+  <div class="bar-top">
+    <div class="seg" role="radiogroup" aria-label="Which intake to check">
+      <button type="button" role="radio" aria-checked="true" data-v="as_received">Intake as received</button>
+      <button type="button" role="radio" aria-checked="false" data-v="after_fixes" tabindex="-1">After fixes</button>
+    </div>
+    <p class="cap" id="cap"></p>
+  </div>
+  <div class="vline" aria-live="polite">
+    <h2 id="verdict-h"></h2>
+    <span class="gate" id="gate"></span>
+    <p id="takeaway"></p>
+  </div>
+  <div class="tally">
+    <div class="stack" id="stack" aria-hidden="true"></div>
+    <div class="counts" id="counts"></div>
+  </div>
+  <div class="campuses"><div class="tiles" id="units" style="margin-top:18px"></div></div>
+  <div class="detail" id="unitDetail" aria-live="polite"></div>
+  <div class="legend"><span><i class="a"></i>Posts with no person</span><span><i class="h"></i>Held by the office's policy</span><span><i class="s"></i>Stuck on setup</span><span>Bars show one week of made-up insurance payment lines run through the setup.</span></div>
+</section>
+
+<div class="layout">
+<div class="content">
+
+<h2 id="weeks-h">First eight weeks</h2>
+<p class="note" style="margin-top:0">After go-live, staff approve every automatic post for weeks 1 and 2, then automatic posting switches on. Each panel is one office's auto-post rate (lines posted with no person, out of lines the policy does not hold for review) against the <span id="tgt"></span>% target. Marks show when a flag fired.</p>
+<div class="weeks"><div class="mult" id="mult"></div>
+<div class="wkey"><span><svg width="22" height="10" aria-hidden="true"><line x1="0" y1="5" x2="22" y2="5" stroke="var(--green)" stroke-width="2"/></svg>Auto-post rate</span><span><svg width="22" height="10" aria-hidden="true"><line x1="0" y1="5" x2="22" y2="5" stroke="var(--ink)" stroke-dasharray="3 3"/></svg>Target</span><span><svg width="22" height="10" aria-hidden="true"><rect x="0" y="0" width="22" height="10" fill="var(--rule-soft)"/></svg>Review weeks</span><span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="var(--ink)"/></svg>Flag fired</span></div></div>
+<div class="scroll"><table class="flags" id="flags"><thead><tr><th>Week</th><th>Office</th><th>Signal and reason</th><th>Next step</th></tr></thead><tbody></tbody></table></div>
+<h3 style="margin-top:26px">The note to each owner</h3>
+<div class="seg" role="radiogroup" aria-label="Office for the owner note" id="noteSeg"></div>
+<div class="seg" role="radiogroup" aria-label="Week of the owner note" id="weekSeg"></div>
+<div class="notebox" id="note" aria-live="polite"></div>
+
+<h2 id="fix-list">Fix list by owner</h2>
+<div id="fixes"></div>
+
+<h2 id="accuracy">How well it works</h2>
+<div class="score" id="stats"></div>
+<p class="note" id="statNote"></p>
+<details><summary>The 16 planted problems</summary><ol id="issues"></ol></details>
+<details id="missBox"><summary>Policy lines Claude read differently from the label</summary><ul id="misses"></ul></details>
+
+<h2 id="checks-h">What it checks</h2>
+<div class="scroll"><table id="checks"><thead><tr><th>Check</th><th>Severity</th><th>Who fixes it</th></tr></thead><tbody></tbody></table></div>
+<details><summary>Events in the eight-week story</summary><ul id="scenario"></ul></details>
+</div>
+
+<aside class="side" aria-label="About this build">
+  <nav aria-label="On this page"><a href="#board">Readiness board</a><a href="#weeks-h">First eight weeks</a><a href="#fix-list">Fix list by owner</a><a href="#accuracy">How well it works</a><a href="#checks-h">What it checks</a></nav>
+  <div><h3>Data</h3><p>The offices, staff, fees, shares, policies and payment lines are made up and describe no real practice. Payer names and CDT procedure codes are public. The eight weeks are a simulation with the events listed under What it checks. Policy readings and owner notes are real Claude output, cached in the repo.</p></div>
+  <div><h3>Run it yourself</h3><p>Python 3.10 or later, standard library only. From the repo folder:</p><pre>python3 -m kit.report as_received
+python3 -m kit.report after_fixes
+python3 -m eval.run_eval
+python3 -m unittest</pre></div>
+  <div><a class="pill" href="https://github.com/pg2342-hub/practice-golive-kit">Code on GitHub</a></div>
+</aside>
+</div>
+</main>
+<script>
+const D = {"preview": true, "group": "A made-up five-office dental group", "target": 90, "review_weeks": 2, "views": {"as_received": [{"id": "OAK", "name": "Oak", "kind": "General, 3 dentists", "pms": "Dentrix G7", "verdict": "NO-GO", "blocking": 3, "warnings": 1, "dry": {"lines": 140, "auto": 0, "held": 16, "stuck": 124, "reasons": [{"kind": "stuck", "reason": "Adjustment type not set up in the PMS", "count": 107}, {"kind": "held", "reason": "Denied claim, held for review", "count": 13}, {"kind": "stuck", "reason": "No write-off rule for this payer", "count": 12}, {"kind": "stuck", "reason": "Paid below the contracted fee", "count": 5}, {"kind": "held", "reason": "Overpayment, held for refund review", "count": 3}]}, "findings": [{"office": "OAK", "check": "duplicate_payer", "severity": "warning", "owner": "Office manager", "message": "Guardian is listed under payer IDs 64246 and GI813.", "line": null}, {"office": "OAK", "check": "policy_open_question", "severity": "blocking", "owner": "Practice owner", "message": "Line 2: \"Delta Premier claims, handle like we always do.\"", "line": 2}, {"office": "OAK", "check": "adj_type_missing", "severity": "blocking", "owner": "Onboarding team", "message": "Line 1 uses \"PPO Write-Off\", which is not set up in Dentrix G7.", "line": 1}, {"office": "OAK", "check": "no_rule_for_case", "severity": "blocking", "owner": "Practice owner", "message": "No rule for the contract write-off (Delta Dental Premier).", "line": null}], "policy": [{"n": 1, "text": "For PPO plans we are in network with, write off the difference between our fee and the allowed amount, using the PPO Write-Off adjustment.", "kind": "rule", "read": "Contract difference, PPO payers: write off (PPO Write-Off)"}, {"n": 2, "text": "Delta Premier claims, handle like we always do.", "kind": "question", "read": "label"}, {"n": 3, "text": "Deductibles and coinsurance go on the patient's account; we never write those off.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 4, "text": "A balance under $5 left after insurance can be written off as Small Balance W/O.", "kind": "rule", "read": "Small balance, all payers: write off if under $5 (Small Balance W/O)"}, {"n": 5, "text": "Denied claims are never written off automatically. Hold them for the billing coordinator.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 6, "text": "If an insurance company pays more than it should, flag it for a refund review.", "kind": "rule", "read": "Overpayment, all payers: refund review"}, {"n": 7, "text": "The office is closed for lunch from 12 to 1.", "kind": "not_posting", "read": "Not about posting"}]}, {"id": "CED", "name": "Cedar", "kind": "Pediatric, 2 dentists", "pms": "Dentrix G7", "verdict": "NO-GO", "blocking": 4, "warnings": 1, "dry": {"lines": 120, "auto": 0, "held": 0, "stuck": 120, "reasons": [{"kind": "stuck", "reason": "Deposit cannot be matched to the bank", "count": 120}]}, "findings": [{"office": "CED", "check": "bank_not_linked", "severity": "blocking", "owner": "Office manager", "message": "Insurance deposits cannot be matched to the bank until the account is linked.", "line": null}, {"office": "CED", "check": "paper_payer", "severity": "warning", "owner": "Payer enrollment", "message": "Denti-Cal (38% of payments) still sends paper EOBs. ERA enrollment planned to be live by week 6.", "line": null}, {"office": "CED", "check": "fee_schedule_missing", "severity": "blocking", "owner": "Office manager", "message": "No contracted fee schedule for United Concordia, so allowed amounts cannot be checked.", "line": null}, {"office": "CED", "check": "policy_open_question", "severity": "blocking", "owner": "Practice owner", "message": "Line 3: \"Small balances get written off.\"", "line": 3}, {"office": "CED", "check": "policy_open_question", "severity": "blocking", "owner": "Practice owner", "message": "Line 7: \"Write off the secondary insurance stuff if it isn't worth chasing.\"", "line": 7}], "policy": [{"n": 1, "text": "Write off PPO contractual differences with PPO Write-Off.", "kind": "rule", "read": "Contract difference, PPO payers: write off (PPO Write-Off)"}, {"n": 2, "text": "Denti-Cal: write off whatever Denti-Cal does not pay, using Medi-Cal W/O. We cannot bill those families.", "kind": "rule", "read": "Contract difference, Medicaid: write off (Medi-Cal W/O)"}, {"n": 3, "text": "Small balances get written off.", "kind": "question", "read": "label"}, {"n": 4, "text": "The patient's share goes to the family's account.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 5, "text": "Denials go to the office manager for review.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 6, "text": "Overpayments: hold for refund review.", "kind": "rule", "read": "Overpayment, all payers: refund review"}, {"n": 7, "text": "Write off the secondary insurance stuff if it isn't worth chasing.", "kind": "question", "read": "label"}]}, {"id": "BIR", "name": "Birch", "kind": "General, 2 dentists", "pms": "Dentrix Ascend", "verdict": "NO-GO", "blocking": 3, "warnings": 0, "dry": {"lines": 110, "auto": 0, "held": 0, "stuck": 110, "reasons": [{"kind": "stuck", "reason": "PMS sync not tested", "count": 110}]}, "findings": [{"office": "BIR", "check": "pms_sync_untested", "severity": "blocking", "owner": "Onboarding team", "message": "Sync with Dentrix Ascend has not been tested at this office.", "line": null}, {"office": "BIR", "check": "eft_without_era", "severity": "blocking", "owner": "Payer enrollment", "message": "MetLife deposits by EFT but no ERA is set up, so deposits cannot be matched to claims.", "line": null}, {"office": "BIR", "check": "policy_open_question", "severity": "blocking", "owner": "Practice owner", "message": "Line 6: \"For Guardian, the doctor decides case by case.\"", "line": 6}], "policy": [{"n": 1, "text": "PPO plans: write off the contractual difference as Contractual Adj.", "kind": "rule", "read": "Contract difference, PPO payers: write off (Contractual Adj)"}, {"n": 2, "text": "The patient owes the deductible and coinsurance; bill the patient.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 3, "text": "Anything under $10 left after insurance, write off as Small Bal Adj.", "kind": "rule", "read": "Small balance, all payers: write off if under $10 (Small Bal Adj)"}, {"n": 4, "text": "Overpayments go to Refund Review.", "kind": "rule", "read": "Overpayment, all payers: refund review"}, {"n": 5, "text": "Denials go to Maria's queue.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 6, "text": "For Guardian, the doctor decides case by case.", "kind": "question", "read": "label"}]}, {"id": "MAP", "name": "Maple", "kind": "General, 4 dentists", "pms": "Open Dental", "verdict": "NO-GO", "blocking": 3, "warnings": 1, "dry": {"lines": 170, "auto": 142, "held": 14, "stuck": 14, "reasons": [{"kind": "stuck", "reason": "Paid below the contracted fee", "count": 14}, {"kind": "held", "reason": "Denied claim, held for review", "count": 9}, {"kind": "held", "reason": "Overpayment, held for refund review", "count": 5}]}, "findings": [{"office": "MAP", "check": "no_exception_owner", "severity": "blocking", "owner": "Office manager", "message": "Name the person who clears exceptions each day.", "line": null}, {"office": "MAP", "check": "fee_above_office_fee", "severity": "warning", "owner": "Office manager", "message": "Delta Dental PPO fee for D2740 ($1520) is above the office fee ($1450).", "line": null}, {"office": "MAP", "check": "policy_open_question", "severity": "blocking", "owner": "Practice owner", "message": "Line 3: \"Write off small balances under $5 or $10, whichever makes sense.\"", "line": 3}, {"office": "MAP", "check": "policy_conflict", "severity": "blocking", "owner": "Practice owner", "message": "Lines 4 and 6 give different actions for the same balance.", "line": 4}], "policy": [{"n": 1, "text": "In-network PPO: write off the difference between our fee and the allowed amount (PPO Writeoff).", "kind": "rule", "read": "Contract difference, PPO payers: write off (PPO Writeoff)"}, {"n": 2, "text": "Patient portions always go to the patient.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 3, "text": "Write off small balances under $5 or $10, whichever makes sense.", "kind": "question", "read": "label"}, {"n": 4, "text": "Never write off a denied claim; it goes to the billing coordinator.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 5, "text": "Overpayments go to Overpayment Hold for a refund review.", "kind": "rule", "read": "Overpayment, all payers: refund review (Overpayment Hold)"}, {"n": 6, "text": "Denied claims under $20 can be written off as Small Balance.", "kind": "rule", "read": "Denied claim, all payers: write off if under $20 (Small Balance)"}]}, {"id": "WIL", "name": "Willow", "kind": "General, 1 dentist, acquired this year", "pms": "Eaglesoft", "verdict": "NO-GO", "blocking": 4, "warnings": 1, "dry": {"lines": 70, "auto": 0, "held": 7, "stuck": 63, "reasons": [{"kind": "stuck", "reason": "No write-off rule for this payer", "count": 38}, {"kind": "stuck", "reason": "Payer plan type unknown", "count": 15}, {"kind": "stuck", "reason": "Paper EOB, keyed by hand until ERA is live", "count": 9}, {"kind": "held", "reason": "Denied claim, held for review", "count": 5}, {"kind": "held", "reason": "Overpayment, held for refund review", "count": 2}, {"kind": "stuck", "reason": "Paid below the contracted fee", "count": 1}]}, "findings": [{"office": "WIL", "check": "payer_type_missing", "severity": "blocking", "owner": "Office manager", "message": "Aetna has no plan type (PPO, HMO, Medicaid).", "line": null}, {"office": "WIL", "check": "paper_payer", "severity": "warning", "owner": "Payer enrollment", "message": "United Concordia (10% of payments) still sends paper EOBs. ERA enrollment planned to be live by week 5.", "line": null}, {"office": "WIL", "check": "policy_open_question", "severity": "blocking", "owner": "Practice owner", "message": "Line 1: \"We follow the same write-off rules as the other offices.\"", "line": 1}, {"office": "WIL", "check": "no_rule_for_case", "severity": "blocking", "owner": "Practice owner", "message": "No rule for the contract write-off (Delta Dental PPO, Cigna, United Concordia, MetLife).", "line": null}, {"office": "WIL", "check": "no_rule_for_case", "severity": "blocking", "owner": "Practice owner", "message": "No rule for the patient's share (Delta Dental PPO, Cigna, United Concordia, MetLife).", "line": null}], "policy": [{"n": 1, "text": "We follow the same write-off rules as the other offices.", "kind": "question", "read": "label"}, {"n": 2, "text": "Cigna claims denied for missing x-rays get resubmitted with the x-rays, never written off. Other denials also go to the office manager.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 3, "text": "Overpayments: INS REFUND, after the office manager reviews.", "kind": "rule", "read": "Overpayment, all payers: refund review (INS REFUND)"}]}], "after_fixes": [{"id": "OAK", "name": "Oak", "kind": "General, 3 dentists", "pms": "Dentrix G7", "verdict": "GO", "blocking": 0, "warnings": 0, "dry": {"lines": 140, "auto": 119, "held": 16, "stuck": 5, "reasons": [{"kind": "held", "reason": "Denied claim, held for review", "count": 13}, {"kind": "stuck", "reason": "Paid below the contracted fee", "count": 5}, {"kind": "held", "reason": "Overpayment, held for refund review", "count": 3}]}, "findings": [], "policy": [{"n": 1, "text": "For PPO plans we are in network with, write off the difference between our fee and the allowed amount, using the PPO Write-Off adjustment.", "kind": "rule", "read": "Contract difference, PPO payers: write off (PPO Write-Off)"}, {"n": 2, "text": "Delta Dental Premier: write off the difference down to the Premier allowed amount with the Premier Adj adjustment.", "kind": "rule", "read": "Contract difference, Delta Dental Premier: write off (Premier Adj)"}, {"n": 3, "text": "Deductibles and coinsurance go on the patient's account; we never write those off.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 4, "text": "A balance under $5 left after insurance can be written off as Small Balance W/O.", "kind": "rule", "read": "Small balance, all payers: write off if under $5 (Small Balance W/O)"}, {"n": 5, "text": "Denied claims are never written off automatically. Hold them for the billing coordinator.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 6, "text": "If an insurance company pays more than it should, flag it for a refund review.", "kind": "rule", "read": "Overpayment, all payers: refund review"}, {"n": 7, "text": "The office is closed for lunch from 12 to 1.", "kind": "not_posting", "read": "Not about posting"}]}, {"id": "CED", "name": "Cedar", "kind": "Pediatric, 2 dentists", "pms": "Dentrix G7", "verdict": "GO WITH FIXES", "blocking": 0, "warnings": 1, "dry": {"lines": 120, "auto": 61, "held": 12, "stuck": 47, "reasons": [{"kind": "stuck", "reason": "Paper EOB, keyed by hand until ERA is live", "count": 43}, {"kind": "held", "reason": "Denied claim, held for review", "count": 6}, {"kind": "held", "reason": "Overpayment, held for refund review", "count": 6}, {"kind": "stuck", "reason": "Paid below the contracted fee", "count": 4}]}, "findings": [{"office": "CED", "check": "paper_payer", "severity": "warning", "owner": "Payer enrollment", "message": "Denti-Cal (38% of payments) still sends paper EOBs. ERA enrollment planned to be live by week 6.", "line": null}], "policy": [{"n": 1, "text": "Write off PPO contractual differences with PPO Write-Off.", "kind": "rule", "read": "Contract difference, PPO payers: write off (PPO Write-Off)"}, {"n": 2, "text": "Denti-Cal: write off whatever Denti-Cal does not pay, using Medi-Cal W/O. We cannot bill those families.", "kind": "rule", "read": "Contract difference, Medicaid: write off (Medi-Cal W/O)"}, {"n": 3, "text": "Small balances under $3 get written off as Small Balance W/O.", "kind": "rule", "read": "Small balance, all payers: write off if under $3 (Small Balance W/O)"}, {"n": 4, "text": "The patient's share goes to the family's account.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 5, "text": "Denials go to the office manager for review.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 6, "text": "Overpayments: hold for refund review.", "kind": "rule", "read": "Overpayment, all payers: refund review"}]}, {"id": "BIR", "name": "Birch", "kind": "General, 2 dentists", "pms": "Dentrix Ascend", "verdict": "GO", "blocking": 0, "warnings": 0, "dry": {"lines": 110, "auto": 98, "held": 9, "stuck": 3, "reasons": [{"kind": "held", "reason": "Denied claim, held for review", "count": 5}, {"kind": "held", "reason": "Overpayment, held for refund review", "count": 4}, {"kind": "stuck", "reason": "Paid below the contracted fee", "count": 3}]}, "findings": [], "policy": [{"n": 1, "text": "PPO plans: write off the contractual difference as Contractual Adj.", "kind": "rule", "read": "Contract difference, PPO payers: write off (Contractual Adj)"}, {"n": 2, "text": "The patient owes the deductible and coinsurance; bill the patient.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 3, "text": "Anything under $10 left after insurance, write off as Small Bal Adj.", "kind": "rule", "read": "Small balance, all payers: write off if under $10 (Small Bal Adj)"}, {"n": 4, "text": "Overpayments go to Refund Review.", "kind": "rule", "read": "Overpayment, all payers: refund review"}, {"n": 5, "text": "Denials go to Maria's queue.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 6, "text": "For Guardian denials, Dr. Lee reviews each one before anything is resubmitted.", "kind": "rule", "read": "Denied claim, Guardian: hold for a person"}]}, {"id": "MAP", "name": "Maple", "kind": "General, 4 dentists", "pms": "Open Dental", "verdict": "GO", "blocking": 0, "warnings": 0, "dry": {"lines": 170, "auto": 147, "held": 14, "stuck": 9, "reasons": [{"kind": "stuck", "reason": "Paid below the contracted fee", "count": 9}, {"kind": "held", "reason": "Denied claim, held for review", "count": 9}, {"kind": "held", "reason": "Overpayment, held for refund review", "count": 5}]}, "findings": [], "policy": [{"n": 1, "text": "In-network PPO: write off the difference between our fee and the allowed amount (PPO Writeoff).", "kind": "rule", "read": "Contract difference, PPO payers: write off (PPO Writeoff)"}, {"n": 2, "text": "Patient portions always go to the patient.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 3, "text": "Write off balances under $5 as Small Balance.", "kind": "rule", "read": "Small balance, all payers: write off if under $5 (Small Balance)"}, {"n": 4, "text": "Never write off a denied claim; it goes to the billing coordinator.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 5, "text": "Overpayments go to Overpayment Hold for a refund review.", "kind": "rule", "read": "Overpayment, all payers: refund review (Overpayment Hold)"}]}, {"id": "WIL", "name": "Willow", "kind": "General, 1 dentist, acquired this year", "pms": "Eaglesoft", "verdict": "GO WITH FIXES", "blocking": 0, "warnings": 1, "dry": {"lines": 70, "auto": 51, "held": 7, "stuck": 12, "reasons": [{"kind": "stuck", "reason": "Paper EOB, keyed by hand until ERA is live", "count": 9}, {"kind": "held", "reason": "Denied claim, held for review", "count": 5}, {"kind": "stuck", "reason": "Paid below the contracted fee", "count": 3}, {"kind": "held", "reason": "Overpayment, held for refund review", "count": 2}]}, "findings": [{"office": "WIL", "check": "paper_payer", "severity": "warning", "owner": "Payer enrollment", "message": "United Concordia (10% of payments) still sends paper EOBs. ERA enrollment planned to be live by week 5.", "line": null}], "policy": [{"n": 1, "text": "PPO differences are written off with PPO DISC.", "kind": "rule", "read": "Contract difference, PPO payers: write off (PPO DISC)"}, {"n": 2, "text": "Patient portion goes to the patient.", "kind": "rule", "read": "Patient's share, all payers: bill the patient"}, {"n": 3, "text": "Write off balances under $5 as SMALL BAL.", "kind": "rule", "read": "Small balance, all payers: write off if under $5 (SMALL BAL)"}, {"n": 4, "text": "Cigna claims denied for missing x-rays get resubmitted with the x-rays, never written off. Other denials also go to the office manager.", "kind": "rule", "read": "Denied claim, all payers: hold for a person"}, {"n": 5, "text": "Overpayments: INS REFUND, after the office manager reviews.", "kind": "rule", "read": "Overpayment, all payers: refund review (INS REFUND)"}]}]}, "health": [{"office": "OAK", "name": "Oak", "weeks": [{"week": 1, "lines": 140, "auto": 117, "held": 19, "stuck": 4, "auto_rate": 97, "mode": "review", "queue_hours_in": 3.1, "hours_cleared": 3.1, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 2, "lines": 140, "auto": 116, "held": 19, "stuck": 5, "auto_rate": 96, "mode": "review", "queue_hours_in": 3.2, "hours_cleared": 3.2, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 3, "lines": 140, "auto": 126, "held": 9, "stuck": 5, "auto_rate": 96, "mode": "auto", "queue_hours_in": 1.2, "hours_cleared": 1.2, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 4, "lines": 140, "auto": 114, "held": 18, "stuck": 8, "auto_rate": 93, "mode": "auto", "queue_hours_in": 2.3, "hours_cleared": 2.3, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 5, "lines": 140, "auto": 120, "held": 15, "stuck": 5, "auto_rate": 96, "mode": "auto", "queue_hours_in": 1.8, "hours_cleared": 1.8, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 6, "lines": 140, "auto": 123, "held": 15, "stuck": 2, "auto_rate": 98, "mode": "auto", "queue_hours_in": 1.6, "hours_cleared": 1.6, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 7, "lines": 140, "auto": 125, "held": 11, "stuck": 4, "auto_rate": 97, "mode": "auto", "queue_hours_in": 1.4, "hours_cleared": 1.4, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 8, "lines": 140, "auto": 121, "held": 11, "stuck": 8, "auto_rate": 94, "mode": "auto", "queue_hours_in": 1.6, "hours_cleared": 1.6, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}], "flags": []}, {"office": "CED", "name": "Cedar", "weeks": [{"week": 1, "lines": 120, "auto": 65, "held": 10, "stuck": 45, "auto_rate": 59, "mode": "review", "queue_hours_in": 4.5, "hours_cleared": 4.5, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 38, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Denti-Cal ERA enrollment slips from week 6 to week 8"]}, {"week": 2, "lines": 120, "auto": 57, "held": 7, "stuck": 56, "auto_rate": 50, "mode": "review", "queue_hours_in": 4.9, "hours_cleared": 4.9, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 38, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Denti-Cal ERA enrollment slips from week 6 to week 8"]}, {"week": 3, "lines": 120, "auto": 56, "held": 7, "stuck": 57, "auto_rate": 50, "mode": "auto", "queue_hours_in": 4.5, "hours_cleared": 4.5, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 38, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Denti-Cal ERA enrollment slips from week 6 to week 8"]}, {"week": 4, "lines": 120, "auto": 66, "held": 7, "stuck": 47, "auto_rate": 58, "mode": "auto", "queue_hours_in": 3.8, "hours_cleared": 3.8, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 38, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Denti-Cal ERA enrollment slips from week 6 to week 8"]}, {"week": 5, "lines": 120, "auto": 67, "held": 12, "stuck": 41, "auto_rate": 62, "mode": "auto", "queue_hours_in": 3.9, "hours_cleared": 3.9, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 38, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Denti-Cal ERA enrollment slips from week 6 to week 8"]}, {"week": 6, "lines": 120, "auto": 74, "held": 7, "stuck": 39, "auto_rate": 65, "mode": "auto", "queue_hours_in": 3.3, "hours_cleared": 3.3, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 38, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Denti-Cal ERA enrollment slips from week 6 to week 8"]}, {"week": 7, "lines": 120, "auto": 59, "held": 8, "stuck": 53, "auto_rate": 53, "mode": "auto", "queue_hours_in": 4.3, "hours_cleared": 4.3, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 38, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Denti-Cal ERA enrollment slips from week 6 to week 8"]}, {"week": 8, "lines": 120, "auto": 106, "held": 10, "stuck": 4, "auto_rate": 96, "mode": "auto", "queue_hours_in": 1.3, "hours_cleared": 1.3, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": ["Denti-Cal ERA enrollment slips from week 6 to week 8"]}], "flags": [{"week": 4, "office": "CED", "signal": "Below the auto-post target", "reason": "58% against a 90% target; most stuck lines: Paper EOB, keyed by hand until ERA is live.", "next_step": "Work the top stuck reason with the office manager this week."}, {"week": 6, "office": "CED", "signal": "ERA enrollment late", "reason": "Denti-Cal was planned to send ERAs by week 6 and still sends paper.", "next_step": "Call Denti-Cal's EDI enrollment line, confirm the enrollment form, and keep keying its EOBs until it is live."}, {"week": 7, "office": "CED", "signal": "Auto-post rate dropped", "reason": "Down from 65% to 53%; most stuck lines: Paper EOB, keyed by hand until ERA is live.", "next_step": "Find what changed for that payer this week and fix the setup before the backlog builds."}]}, {"office": "BIR", "name": "Birch", "weeks": [{"week": 1, "lines": 110, "auto": 92, "held": 13, "stuck": 5, "auto_rate": 95, "mode": "review", "queue_hours_in": 2.4, "hours_cleared": 2.4, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 2, "lines": 110, "auto": 95, "held": 11, "stuck": 4, "auto_rate": 96, "mode": "review", "queue_hours_in": 2.2, "hours_cleared": 2.2, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 3, "lines": 110, "auto": 94, "held": 11, "stuck": 5, "auto_rate": 95, "mode": "auto", "queue_hours_in": 1.4, "hours_cleared": 1.4, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 4, "lines": 110, "auto": 69, "held": 11, "stuck": 30, "auto_rate": 70, "mode": "auto", "queue_hours_in": 3.1, "hours_cleared": 3.1, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "EFT deposit with no ERA to match it to", "events": ["MetLife moved Birch to a new ERA payer ID; ERAs stop matching"]}, {"week": 5, "lines": 110, "auto": 74, "held": 10, "stuck": 26, "auto_rate": 74, "mode": "auto", "queue_hours_in": 2.7, "hours_cleared": 2.7, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "EFT deposit with no ERA to match it to", "events": ["MetLife moved Birch to a new ERA payer ID; ERAs stop matching"]}, {"week": 6, "lines": 110, "auto": 91, "held": 10, "stuck": 9, "auto_rate": 91, "mode": "auto", "queue_hours_in": 1.6, "hours_cleared": 1.6, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 7, "lines": 110, "auto": 99, "held": 10, "stuck": 1, "auto_rate": 99, "mode": "auto", "queue_hours_in": 1.1, "hours_cleared": 1.1, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 8, "lines": 110, "auto": 96, "held": 11, "stuck": 3, "auto_rate": 97, "mode": "auto", "queue_hours_in": 1.3, "hours_cleared": 1.3, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}], "flags": [{"week": 4, "office": "BIR", "signal": "Auto-post rate dropped", "reason": "Down from 95% to 70%; most stuck lines: EFT deposit with no ERA to match it to.", "next_step": "Find what changed for that payer this week and fix the setup before the backlog builds."}, {"week": 5, "office": "BIR", "signal": "Below the auto-post target", "reason": "74% against a 90% target; most stuck lines: EFT deposit with no ERA to match it to.", "next_step": "Work the top stuck reason with the office manager this week."}]}, {"office": "MAP", "name": "Maple", "weeks": [{"week": 1, "lines": 170, "auto": 149, "held": 19, "stuck": 2, "auto_rate": 99, "mode": "review", "queue_hours_in": 3.3, "hours_cleared": 3.3, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 2, "lines": 170, "auto": 149, "held": 14, "stuck": 7, "auto_rate": 96, "mode": "review", "queue_hours_in": 3.1, "hours_cleared": 3.1, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 3, "lines": 170, "auto": 148, "held": 14, "stuck": 8, "auto_rate": 95, "mode": "auto", "queue_hours_in": 1.9, "hours_cleared": 1.9, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 4, "lines": 170, "auto": 143, "held": 22, "stuck": 5, "auto_rate": 97, "mode": "auto", "queue_hours_in": 2.5, "hours_cleared": 2.5, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 5, "lines": 170, "auto": 142, "held": 18, "stuck": 10, "auto_rate": 93, "mode": "auto", "queue_hours_in": 2.5, "hours_cleared": 2.5, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}, {"week": 6, "lines": 170, "auto": 145, "held": 20, "stuck": 5, "auto_rate": 97, "mode": "auto", "queue_hours_in": 2.3, "hours_cleared": 0.0, "backlog_hours": 2.3, "oldest_days": 5, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": ["Billing coordinator on leave; no one clears the queue"]}, {"week": 7, "lines": 170, "auto": 148, "held": 14, "stuck": 8, "auto_rate": 95, "mode": "auto", "queue_hours_in": 1.9, "hours_cleared": 0.0, "backlog_hours": 4.3, "oldest_days": 10, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": ["Billing coordinator on leave; no one clears the queue"]}, {"week": 8, "lines": 170, "auto": 152, "held": 14, "stuck": 4, "auto_rate": 97, "mode": "auto", "queue_hours_in": 1.7, "hours_cleared": 5.9, "backlog_hours": 0.0, "oldest_days": 0, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": []}], "flags": [{"week": 7, "office": "MAP", "signal": "Exception backlog growing", "reason": "4.3 hours of exceptions waiting, up two weeks in a row.", "next_step": "Agree more queue hours with the owner, or move the held denials to a second person."}, {"week": 7, "office": "MAP", "signal": "Exceptions going stale", "reason": "Some exceptions have waited more than a week (up to 10 working days).", "next_step": "Name a backup for the exception queue and clear the oldest items first."}]}, {"office": "WIL", "name": "Willow", "weeks": [{"week": 1, "lines": 70, "auto": 57, "held": 2, "stuck": 11, "auto_rate": 84, "mode": "review", "queue_hours_in": 1.4, "hours_cleared": 1.0, "backlog_hours": 0.4, "oldest_days": 5, "paper_pct": 10, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Office manager also covers the front desk; 1 hour a week on the queue"]}, {"week": 2, "lines": 70, "auto": 49, "held": 11, "stuck": 10, "auto_rate": 83, "mode": "review", "queue_hours_in": 2.2, "hours_cleared": 1.0, "backlog_hours": 1.6, "oldest_days": 5, "paper_pct": 10, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Office manager also covers the front desk; 1 hour a week on the queue"]}, {"week": 3, "lines": 70, "auto": 48, "held": 14, "stuck": 8, "auto_rate": 86, "mode": "auto", "queue_hours_in": 1.9, "hours_cleared": 1.0, "backlog_hours": 2.5, "oldest_days": 10, "paper_pct": 10, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Office manager also covers the front desk; 1 hour a week on the queue"]}, {"week": 4, "lines": 70, "auto": 58, "held": 5, "stuck": 7, "auto_rate": 89, "mode": "auto", "queue_hours_in": 1.0, "hours_cleared": 1.0, "backlog_hours": 2.5, "oldest_days": 10, "paper_pct": 10, "top_stuck": "Paper EOB, keyed by hand until ERA is live", "events": ["Office manager also covers the front desk; 1 hour a week on the queue"]}, {"week": 5, "lines": 70, "auto": 56, "held": 12, "stuck": 2, "auto_rate": 97, "mode": "auto", "queue_hours_in": 1.3, "hours_cleared": 1.0, "backlog_hours": 2.8, "oldest_days": 15, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": ["Office manager also covers the front desk; 1 hour a week on the queue"]}, {"week": 6, "lines": 70, "auto": 64, "held": 3, "stuck": 3, "auto_rate": 96, "mode": "auto", "queue_hours_in": 0.5, "hours_cleared": 1.0, "backlog_hours": 2.3, "oldest_days": 15, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": ["Office manager also covers the front desk; 1 hour a week on the queue"]}, {"week": 7, "lines": 70, "auto": 56, "held": 11, "stuck": 3, "auto_rate": 95, "mode": "auto", "queue_hours_in": 1.3, "hours_cleared": 1.0, "backlog_hours": 2.6, "oldest_days": 15, "paper_pct": 0, "top_stuck": "Paid below the contracted fee", "events": ["Office manager also covers the front desk; 1 hour a week on the queue"]}, {"week": 8, "lines": 70, "auto": 63, "held": 7, "stuck": 0, "auto_rate": 100, "mode": "auto", "queue_hours_in": 0.7, "hours_cleared": 1.0, "backlog_hours": 2.3, "oldest_days": 15, "paper_pct": 0, "top_stuck": null, "events": ["Office manager also covers the front desk; 1 hour a week on the queue"]}], "flags": [{"week": 3, "office": "WIL", "signal": "Exception backlog growing", "reason": "2.5 hours of exceptions waiting, up two weeks in a row.", "next_step": "Agree more queue hours with the owner, or move the held denials to a second person."}, {"week": 3, "office": "WIL", "signal": "Exceptions going stale", "reason": "Some exceptions have waited more than a week (up to 10 working days).", "next_step": "Name a backup for the exception queue and clear the oldest items first."}, {"week": 4, "office": "WIL", "signal": "Below the auto-post target", "reason": "89% against a 90% target; most stuck lines: Paper EOB, keyed by hand until ERA is live.", "next_step": "Work the top stuck reason with the office manager this week."}]}], "notes": {}, "scenario": [{"office": "BIR", "what": "MetLife moved Birch to a new ERA payer ID; ERAs stop matching"}, {"office": "CED", "what": "Denti-Cal ERA enrollment slips from week 6 to week 8"}, {"office": "WIL", "what": "Office manager also covers the front desk; 1 hour a week on the queue"}, {"office": "MAP", "what": "Billing coordinator on leave; no one clears the queue"}], "checks": [{"id": "pms_sync_untested", "name": "PMS sync not tested on this office's system", "severity": "blocking", "owner": "Onboarding team"}, {"id": "bank_not_linked", "name": "Deposit account not linked", "severity": "blocking", "owner": "Office manager"}, {"id": "eft_without_era", "name": "Payer pays by EFT but sends no electronic remittance (ERA)", "severity": "blocking", "owner": "Payer enrollment"}, {"id": "paper_payer", "name": "Payer still sends paper EOBs", "severity": "warning", "owner": "Payer enrollment"}, {"id": "payer_type_missing", "name": "Payer plan type missing", "severity": "blocking", "owner": "Office manager"}, {"id": "duplicate_payer", "name": "Same payer listed twice", "severity": "warning", "owner": "Office manager"}, {"id": "fee_schedule_missing", "name": "In-network payer with no contracted fee schedule", "severity": "blocking", "owner": "Office manager"}, {"id": "fee_above_office_fee", "name": "Contracted fee higher than the office fee", "severity": "warning", "owner": "Office manager"}, {"id": "no_exception_owner", "name": "Nobody named to work the exception queue", "severity": "blocking", "owner": "Office manager"}, {"id": "policy_open_question", "name": "Policy line needs the owner's decision", "severity": "blocking", "owner": "Practice owner"}, {"id": "policy_conflict", "name": "Two policy rules disagree", "severity": "blocking", "owner": "Practice owner"}, {"id": "adj_type_missing", "name": "Policy names an adjustment type the PMS does not have", "severity": "blocking", "owner": "Onboarding team"}, {"id": "no_rule_for_case", "name": "No policy rule for a kind of balance this office sees", "severity": "blocking", "owner": "Practice owner"}], "plants": [{"office": "OAK", "label": "PPO Write-Off adjustment type named in the policy is not set up in Dentrix"}, {"office": "OAK", "label": "Delta Premier policy line says 'handle like we always do'"}, {"office": "OAK", "label": "Guardian listed twice under two payer IDs"}, {"office": "CED", "label": "Deposit account not linked, so payments cannot be matched to the bank"}, {"office": "CED", "label": "Small balance write-off with no dollar limit"}, {"office": "CED", "label": "Secondary insurance line with no clear rule"}, {"office": "CED", "label": "United Concordia contracted fee schedule never sent"}, {"office": "BIR", "label": "PMS sync not yet tested on Dentrix Ascend"}, {"office": "BIR", "label": "Guardian line says the doctor decides case by case"}, {"office": "BIR", "label": "MetLife pays by EFT but no electronic remittance (ERA) is set up"}, {"office": "MAP", "label": "Nobody named to work the exception queue"}, {"office": "MAP", "label": "Small balance limit given as '$5 or $10'"}, {"office": "MAP", "label": "Crown fee for Delta Dental PPO entered above the office fee"}, {"office": "MAP", "label": "Policy both writes off small denials and never writes off denials"}, {"office": "WIL", "label": "Policy says 'same rules as the other offices' instead of its own rules"}, {"office": "WIL", "label": "Aetna plan type left blank"}], "eval": {"checks": {"total": 16, "alone_caught": 16, "alone_extra": 0, "together_caught": 16, "fp": 0, "clean": 0}, "policy": null, "usage": null}};
+let view = "as_received", sel = null, noteOffice = null, noteWeek = 4;
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cls = v => v.replace(/ /g,"-");
+const plural = (n,w) => `${n} ${w}${n==1?"":"s"}`;
+const pct = (a,b) => b ? Math.round(100*a/b) : 0;
+const ORDER = ["NO-GO","GO WITH FIXES","GO"];
+const MEANS = {"NO-GO":"at least one blocking problem","GO WITH FIXES":"warnings only","GO":"nothing found"};
+const CAPS = {as_received:"Five offices as their intake first came in, with 16 typical setup problems.",
+              after_fixes:"The same offices after the fixes and the owners' answers."};
+const NAME = Object.fromEntries(D.views.after_fixes.map(o=>[o.id,o.name]));
+const badge = v => `<span class="badge ${v=="NO-GO"?"no-go":v=="GO"?"go":"fixes"}">${v}</span>`;
+
+if (D.preview) document.getElementById("previewNote").innerHTML =
+  `<p class="preview">Preview built from the labelled policy answers. The published page uses Claude's readings.</p>`;
+document.getElementById("tgt").textContent = D.target;
+
+function radios(el, onPick){
+  const bs=[...el.querySelectorAll("button")];
+  bs.forEach((b,i)=>{
+    b.addEventListener("click",()=>onPick(b.dataset.v));
+    b.addEventListener("keydown",e=>{
+      if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key))return;
+      e.preventDefault(); const n=bs[(i+(e.key=="ArrowLeft"||e.key=="ArrowUp"?bs.length-1:1))%bs.length]; onPick(n.dataset.v); n.focus();
+    });
+  });
+}
+function mark(el, v){el.querySelectorAll("button").forEach(b=>{const on=b.dataset.v==String(v); b.setAttribute("aria-checked",String(on)); b.tabIndex=on?0:-1;});}
+
+const boardSeg=document.querySelector("#board .seg");
+radios(boardSeg, v=>{view=v; mark(boardSeg,v); render();});
+
+function dbar(d){
+  return `<span class="dbar" role="img" aria-label="${d.auto} of ${d.lines} lines post with no person, ${d.held} held by policy, ${d.stuck} stuck on setup"><i class="a" style="width:${100*d.auto/d.lines}%"></i><i class="h" style="width:${100*d.held/d.lines}%"></i><i class="s" style="width:${100*d.stuck/d.lines}%"></i></span>`;
+}
+
+function render(){
+  const vs=D.views[view];
+  const cnt={}; ORDER.forEach(k=>cnt[k]=vs.filter(x=>x.verdict==k).length);
+  const no=cnt["NO-GO"], fx=cnt["GO WITH FIXES"], go=cnt["GO"];
+  const all=vs.flatMap(o=>o.findings);
+  document.getElementById("cap").textContent=CAPS[view];
+  const h=document.getElementById("verdict-h"), g=document.getElementById("gate"), t=document.getElementById("takeaway");
+  const lines=vs.reduce((a,o)=>a+o.dry.lines,0), auto=vs.reduce((a,o)=>a+o.dry.auto,0);
+  if(no){
+    h.textContent="Not ready"; g.className="gate nogo"; g.textContent="NO-GO";
+    t.innerHTML=`<b>${no} of ${vs.length} offices are NO-GO.</b> ${plural(all.length,"finding")} for ${new Set(all.map(x=>x.owner)).size} owners to fix, and only ${auto} of ${lines} payment lines in a test week would post with no person.`;
+  } else {
+    h.textContent="Ready to go live"; g.className="gate go"; g.textContent="GO";
+    t.innerHTML=`<b>No office is blocked</b> (${go} GO, ${fx} GO WITH FIXES). ${auto} of ${lines} payment lines in a test week post with no person; the rest are denials and overpayments the owners chose to review, or paper EOBs until those payers send ERAs.`;
+  }
+  document.getElementById("stack").innerHTML=ORDER.flatMap(k=>Array(cnt[k]).fill(`<i class="k-${cls(k)}"></i>`)).join("");
+  document.getElementById("counts").innerHTML=ORDER.map(k=>`<div class="${cnt[k]?"":"zero"}"><b>${cnt[k]}</b><span class="lab"><i class="k-${cls(k)}"></i>${k}</span><span>${MEANS[k]}</span></div>`).join("");
+  document.getElementById("units").innerHTML=vs.map(u=>
+    `<button type="button" class="tile t-${cls(u.verdict)}" data-u="${u.id}" aria-expanded="${sel==u.id}" aria-controls="unitDetail">
+      <span class="top"><span class="code">${esc(u.pms)}</span>${badge(u.verdict)}</span>
+      <span class="name">${esc(u.name)}<span class="pms" style="display:block">${esc(u.kind)}</span></span>
+      <span class="dry">${dbar(u.dry)}<span><b>${pct(u.dry.auto,u.dry.lines)}%</b>post with no person</span></span>
+      <span class="nums"><span class="${u.blocking?"":"z"}"><b>${u.blocking}</b>blocking</span><span class="${u.warnings?"":"z"}"><b>${u.warnings}</b>${u.warnings==1?"warning":"warnings"}</span></span>
+    </button>`).join("");
+  document.querySelectorAll("button.tile").forEach(b=>b.addEventListener("click",()=>pick(b.dataset.u)));
+  const det=document.getElementById("unitDetail");
+  if(sel){
+    const u=vs.find(x=>x.id==sel), items=[...u.findings].sort((a,b)=>(a.severity!="blocking")-(b.severity!="blocking"));
+    det.innerHTML=`<h3>${esc(u.name)} <span style="font:400 14px var(--mono);color:var(--ink-2)">${esc(u.pms)}</span></h3>`+
+      (items.length?`<ul class="probs">${items.map(x=>`<li><span class="sev ${x.severity}">${x.severity}</span><span>${esc(x.message)}</span><span class="own">${esc(x.owner)}</span></li>`).join("")}</ul>`
+        :`<p class="hint">No problems found for this office.</p>`)+
+      `<div class="dgrid"><div><h4>One test week: ${u.dry.auto} of ${u.dry.lines} lines post with no person</h4>${dbar(u.dry)}<ul class="reasons" style="margin-top:8px">${u.dry.reasons.map(r=>`<li><span class="c">${r.count}</span><span>${esc(r.reason)}<span class="k">${r.kind=="held"?"held by policy":"stuck"}</span></span></li>`).join("")}</ul></div>
+       <div><h4>The write-off policy, as Claude read it</h4><ol class="pol">${u.policy.map(p=>`<li><span class="ln">${p.n}</span><span>${esc(p.text)}</span><span class="rd"><span class="kd ${p.kind}">${p.kind=="question"?"ASK OWNER":p.kind=="rule"?"RULE":"SKIP"}</span><span>${esc(p.read)}</span></span></li>`).join("")}</ol></div></div>`;
+  } else det.innerHTML=`<p class="hint">Select an office to see its problems, a test week of payments, and how its write-off policy was read.</p>`;
+  const groups={}; all.forEach(x=>{(groups[x.owner]=groups[x.owner]||[]).push(x)});
+  const nb=o=>groups[o].filter(x=>x.severity=="blocking").length;
+  const order=Object.keys(groups).sort((a,b)=>nb(b)-nb(a)||a.localeCompare(b));
+  document.getElementById("fixes").innerHTML = order.length?
+    `<p class="fixsum">${plural(all.length,"finding")} for ${plural(order.length,"owner")}, ${all.filter(x=>x.severity=="blocking").length} of them blocking. Owners with the most blocking fixes come first. Switch the board above to see the other intake.</p>`+
+    order.map(o=>{const b=nb(o), w=groups[o].length-b;
+      return `<div class="team"><div class="team-h"><h3>${esc(o)}</h3><p><span><b>${b}</b>blocking</span><span><b>${w}</b>${w==1?"warning":"warnings"}</span></p></div><ul class="todo">${groups[o].sort((a,b)=>(a.severity!="blocking")-(b.severity!="blocking")||a.office.localeCompare(b.office)).map(x=>`<li><span class="sev ${x.severity}">${x.severity}</span><span class="u">${esc(NAME[x.office])}</span><span class="msg">${esc(x.message)}</span></li>`).join("")}</ul></div>`;}).join("")
+    : `<p class="done">Nothing to fix.</p>`;
+}
+function pick(u){sel = sel==u?null:u; render(); const b=document.querySelector(`button.tile[data-u="${u}"]`); b&&b.focus();}
+
+// Eight-week small multiples, drawn to scale: x = week 1..8, y = 0..100%.
+function panel(s){
+  const W=230,H=140,L=28,R=8,T=8,B=20, x=w=>L+(w-1)*(W-L-R)/7, y=p=>T+(100-p)*(H-T-B)/100;
+  const pts=s.weeks.map(w=>`${x(w.week).toFixed(1)},${y(w.auto_rate).toFixed(1)}`).join(" ");
+  const fw=[...new Set(s.flags.map(f=>f.week))];
+  const shade=`<rect x="${x(1)-((W-L-R)/14)}" y="${T}" width="${(W-L-R)/7*D.review_weeks}" height="${H-T-B}" fill="var(--rule-soft)"/>`;
+  const grid=[0,50,100].map(p=>`<line x1="${L}" x2="${W-R}" y1="${y(p)}" y2="${y(p)}" stroke="var(--rule)" stroke-width=".5"/><text x="${L-4}" y="${y(p)+3}" text-anchor="end">${p}</text>`).join("");
+  const ticks=s.weeks.map(w=>`<text x="${x(w.week)}" y="${H-6}" text-anchor="middle">${w.week}</text>`).join("");
+  const target=`<line x1="${L}" x2="${W-R}" y1="${y(D.target)}" y2="${y(D.target)}" stroke="var(--ink)" stroke-dasharray="3 3" stroke-width="1"/>`;
+  const dots=fw.map(wk=>{const w=s.weeks.find(z=>z.week==wk);return `<circle cx="${x(wk)}" cy="${y(w.auto_rate)}" r="4.5" fill="var(--ink)" stroke="#fbfaf6" stroke-width="1.5"><title>Week ${wk}: ${esc(s.flags.filter(f=>f.week==wk).map(f=>f.signal).join(", "))}</title></circle>`}).join("");
+  const last=s.weeks[s.weeks.length-1];
+  return `<figure><figcaption>${esc(s.name)}</figcaption><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(s.name)}: auto-post rate by week ${s.weeks.map(w=>w.auto_rate+"%").join(", ")}; ${plural(s.flags.length,"flag")}">${shade}${grid}${target}<polyline points="${pts}" fill="none" stroke="var(--green)" stroke-width="2" stroke-linejoin="round"/>${dots}${ticks}</svg><span style="font-size:13px;color:var(--ink-2)">Week 8: ${last.auto_rate}%, ${plural(s.flags.length,"flag")}</span></figure>`;
+}
+document.getElementById("mult").innerHTML=D.health.map(panel).join("");
+const fl=D.health.flatMap(s=>s.flags).sort((a,b)=>a.week-b.week||a.office.localeCompare(b.office));
+document.querySelector("#flags tbody").innerHTML=fl.map(f=>`<tr><td class="num">${f.week}</td><td>${esc(NAME[f.office])}</td><td><span class="sig">${esc(f.signal)}.</span> ${esc(f.reason)}</td><td>${esc(f.next_step)}</td></tr>`).join("");
+
+const ns=document.getElementById("noteSeg"), wsg=document.getElementById("weekSeg");
+ns.innerHTML=D.health.map((s,i)=>`<button type="button" role="radio" aria-checked="${i==0}" data-v="${s.office}"${i?' tabindex="-1"':""}>${esc(s.name)}</button>`).join("");
+wsg.innerHTML=[4,8].map((w,i)=>`<button type="button" role="radio" aria-checked="${i==0}" data-v="${w}"${i?' tabindex="-1"':""}>Week ${w}</button>`).join("");
+noteOffice=D.health[0].office;
+radios(ns, v=>{noteOffice=v; mark(ns,v); showNote();});
+radios(wsg, v=>{noteWeek=+v; mark(wsg,v); showNote();});
+function showNote(){
+  const n=D.notes[`${noteOffice}-${noteWeek}`];
+  document.getElementById("note").innerHTML = n
+    ? `<p>${esc(n)}</p><p class="src">Drafted by Claude from ${esc(NAME[noteOffice])}'s numbers for weeks 1 to ${noteWeek}. Every number in it was checked against those numbers.</p>`
+    : `<p class="src">No note yet for this week.</p>`;
+}
+showNote();
+
+const C=D.eval.checks, P=D.eval.policy;
+const tiles=[[`${C.alone_caught} <small>of ${C.total}</small>`,"planted setup problems caught, each on its own"],
+ [`${C.together_caught} <small>of ${C.total}</small>`,"caught with all 16 planted at once"],
+ [`${C.fp}`,"false positives"]];
+if(P) tiles.push([`${P.clear.correct} <small>of ${P.clear.n}</small>`,`clear policy lines turned into the right rule (${P.runs} runs)`],
+ [`${P.vague.asked} <small>of ${P.vague.n}</small>`,"vague policy lines sent to the owner as a question"],
+ [`${P.critical}`,"write-offs the policy did not clearly allow"]);
+document.getElementById("stats").innerHTML=tiles.map(s=>`<div><b>${s[0]}</b>${s[1]}</div>`).join("");
+document.getElementById("statNote").textContent = P
+  ? `The first three numbers test the checks on labelled policy answers. The last three score Claude's reading of all ${P.total_lines/P.runs} policy lines (both intakes) on each of ${P.runs} runs` + (D.eval.usage?`, ${D.eval.usage.calls} calls to ${D.eval.usage.model}, about ${D.eval.usage.seconds} seconds each.`:".")
+  : "Claude's policy readings have not run yet.";
+document.getElementById("issues").innerHTML=D.plants.map(p=>`<li>${esc(NAME[p.office])}: ${esc(p.label)}</li>`).join("");
+if(P && P.misses.length){document.getElementById("misses").innerHTML=P.misses.map(m=>`<li>${esc(NAME[m.office])}, ${m.state=="as_received"?"intake as received":"after fixes"}, run ${m.run}, line ${m.line} ("${esc(m.text)}"): ${esc(m.what)}</li>`).join("");}
+else document.getElementById("missBox").hidden=true;
+document.querySelector("#checks tbody").innerHTML=D.checks.map(c=>`<tr><td>${esc(c.name)}</td><td><span class="sev ${c.severity}">${c.severity}</span></td><td>${esc(c.owner)}</td></tr>`).join("");
+document.getElementById("scenario").innerHTML=D.scenario.map(s=>`<li>${esc(NAME[s.office])}: ${esc(s.what)}</li>`).join("");
+render();
+</script>
+<!-- demo-chrome --><footer class="demo-foot"><span>A working build by <a href="https://pranavgudise.dev/">Pranav Gudise</a>. Synthetic or public data only.</span><a href="https://github.com/pg2342-hub/practice-golive-kit">github.com/pg2342-hub/practice-golive-kit</a></footer><!-- /demo-chrome -->
+</body>
+</html>
