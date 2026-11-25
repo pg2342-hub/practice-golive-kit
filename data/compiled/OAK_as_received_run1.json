@@ -1,0 +1,92 @@
+{
+ "office": "OAK",
+ "state": "as_received",
+ "run": 1,
+ "policy_sha": "94e15e37e1da",
+ "policy": "1. For PPO plans we are in network with, write off the difference between our fee and the allowed amount, using the PPO Write-Off adjustment.\n2. Delta Premier claims, handle like we always do.\n3. Deductibles and coinsurance go on the patient's account; we never write those off.\n4. A balance under $5 left after insurance can be written off as Small Balance W/O.\n5. Denied claims are never written off automatically. Hold them for the billing coordinator.\n6. If an insurance company pays more than it should, flag it for a refund review.\n7. The office is closed for lunch from 12 to 1.",
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1761,
+  "output_tokens": 570,
+  "seconds": 5.5
+ },
+ "lines": [
+  {
+   "line": 1,
+   "kind": "rule",
+   "rule": {
+    "case": "contract_difference",
+    "action": "write_off",
+    "payer_scope": "ppo",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": "PPO Write-Off"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 2,
+   "kind": "question",
+   "rule": null,
+   "question_for_owner": "For Delta Dental Premier claims, what exactly should happen to the difference between our fee and the allowed amount (write it off, bill the patient, or hold for review), is there a dollar limit, and should it be posted with the Premier Adj adjustment type?"
+  },
+  {
+   "line": 3,
+   "kind": "rule",
+   "rule": {
+    "case": "patient_portion",
+    "action": "bill_patient",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 4,
+   "kind": "rule",
+   "rule": {
+    "case": "small_balance",
+    "action": "write_off",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": 5,
+    "adjustment_type": "Small Balance W/O"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 5,
+   "kind": "rule",
+   "rule": {
+    "case": "denied_claim",
+    "action": "hold_for_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 6,
+   "kind": "rule",
+   "rule": {
+    "case": "overpayment",
+    "action": "refund_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 7,
+   "kind": "not_posting",
+   "rule": null,
+   "question_for_owner": null
+  }
+ ]
+}

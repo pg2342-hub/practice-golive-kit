@@ -1,0 +1,14 @@
+{
+ "office": "WIL",
+ "week": 4,
+ "facts_sha": "84bead7c76ba",
+ "note": "This week the assistant posted 58 of 70 lines on its own, an 89% rate, just short of our 90% target. Most of the lines it couldn't post were paper EOBs, which are still keyed by hand until electronic remittances (ERA) are live. The one thing that needs attention is the exception queue: 2.5 hours of items are waiting, and the oldest has sat for 10 days, so we will clear the oldest items first this week. To keep it from backing up again, could you name a backup person for the exception queue, or set aside more hours each week for working it?",
+ "ungrounded": [],
+ "attempts": 1,
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1312,
+  "output_tokens": 759,
+  "seconds": 8.1
+ }
+}

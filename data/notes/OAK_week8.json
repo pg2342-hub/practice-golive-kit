@@ -1,0 +1,14 @@
+{
+ "office": "OAK",
+ "week": 8,
+ "facts_sha": "c788f461c7f9",
+ "note": "Posting went smoothly in week 8: of 140 lines, 121 posted automatically, 11 were held for a quick check, and 8 got stuck, for an auto-post rate of 94% against our 90% target. There was no backlog, and nothing is waiting on anyone. The one thing to watch is that 8 stuck lines matches our highest week so far, and the most common reason is still insurance paying below the contracted fee. We will review those lines and compare them against the fee schedules on file to find any outdated fees or underpaying insurers. Nothing is needed from you right now, but we may ask you to confirm a contracted fee if we find a mismatch.",
+ "ungrounded": [],
+ "attempts": 1,
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1488,
+  "output_tokens": 472,
+  "seconds": 5.8
+ }
+}

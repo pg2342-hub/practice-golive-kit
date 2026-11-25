@@ -1,0 +1,14 @@
+{
+ "office": "CED",
+ "week": 4,
+ "facts_sha": "5e4fbdb4c19c",
+ "note": "This week the assistant posted 66 of 120 lines on its own, which is 58%, up from 50% last week, with no backlog building up. The main issue is that we are still well below the 90% target, and most of the stuck lines are paper insurance statements (38% of lines) that have to be keyed by hand until electronic remittance is live. This week I will work through those stuck paper statements with your office manager to see what we can move along. If you can, please let your office manager know this is a priority so we can set aside time together.",
+ "ungrounded": [],
+ "attempts": 1,
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1109,
+  "output_tokens": 164,
+  "seconds": 2.5
+ }
+}

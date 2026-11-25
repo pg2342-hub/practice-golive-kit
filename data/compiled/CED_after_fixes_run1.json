@@ -1,0 +1,93 @@
+{
+ "office": "CED",
+ "state": "after_fixes",
+ "run": 1,
+ "policy_sha": "27e64a1a6746",
+ "policy": "1. Write off PPO contractual differences with PPO Write-Off.\n2. Denti-Cal: write off whatever Denti-Cal does not pay, using Medi-Cal W/O. We cannot bill those families.\n3. Small balances under $3 get written off as Small Balance W/O.\n4. The patient's share goes to the family's account.\n5. Denials go to the office manager for review.\n6. Overpayments: hold for refund review.",
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1709,
+  "output_tokens": 1008,
+  "seconds": 9.3
+ },
+ "lines": [
+  {
+   "line": 1,
+   "kind": "rule",
+   "rule": {
+    "case": "contract_difference",
+    "action": "write_off",
+    "payer_scope": "ppo",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": "PPO Write-Off"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 2,
+   "kind": "rule",
+   "rule": {
+    "case": "contract_difference",
+    "action": "write_off",
+    "payer_scope": "medicaid",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": "Medi-Cal W/O"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 3,
+   "kind": "rule",
+   "rule": {
+    "case": "small_balance",
+    "action": "write_off",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": 3,
+    "adjustment_type": "Small Balance W/O"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 4,
+   "kind": "rule",
+   "rule": {
+    "case": "patient_portion",
+    "action": "bill_patient",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 5,
+   "kind": "rule",
+   "rule": {
+    "case": "denied_claim",
+    "action": "hold_for_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 6,
+   "kind": "rule",
+   "rule": {
+    "case": "overpayment",
+    "action": "refund_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  }
+ ]
+}

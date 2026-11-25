@@ -1,0 +1,80 @@
+{
+ "office": "MAP",
+ "state": "after_fixes",
+ "run": 1,
+ "policy_sha": "31b3fed527ee",
+ "policy": "1. In-network PPO: write off the difference between our fee and the allowed amount (PPO Writeoff).\n2. Patient portions always go to the patient.\n3. Write off balances under $5 as Small Balance.\n4. Never write off a denied claim; it goes to the billing coordinator.\n5. Overpayments go to Overpayment Hold for a refund review.",
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1658,
+  "output_tokens": 435,
+  "seconds": 5.1
+ },
+ "lines": [
+  {
+   "line": 1,
+   "kind": "rule",
+   "rule": {
+    "case": "contract_difference",
+    "action": "write_off",
+    "payer_scope": "ppo",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": "PPO Writeoff"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 2,
+   "kind": "rule",
+   "rule": {
+    "case": "patient_portion",
+    "action": "bill_patient",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 3,
+   "kind": "rule",
+   "rule": {
+    "case": "small_balance",
+    "action": "write_off",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": 5,
+    "adjustment_type": "Small Balance"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 4,
+   "kind": "rule",
+   "rule": {
+    "case": "denied_claim",
+    "action": "hold_for_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 5,
+   "kind": "rule",
+   "rule": {
+    "case": "overpayment",
+    "action": "refund_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": "Overpayment Hold"
+   },
+   "question_for_owner": null
+  }
+ ]
+}

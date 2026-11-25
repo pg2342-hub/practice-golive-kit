@@ -1,0 +1,86 @@
+{
+ "office": "BIR",
+ "state": "as_received",
+ "run": 3,
+ "policy_sha": "3066741bc909",
+ "policy": "1. PPO plans: write off the contractual difference as Contractual Adj.\n2. The patient owes the deductible and coinsurance; bill the patient.\n3. Anything under $10 left after insurance, write off as Small Bal Adj.\n4. Overpayments go to Refund Review.\n5. Denials go to Maria's queue.\n6. For Guardian, the doctor decides case by case.",
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1671,
+  "output_tokens": 727,
+  "seconds": 8.4
+ },
+ "lines": [
+  {
+   "line": 1,
+   "kind": "rule",
+   "rule": {
+    "case": "contract_difference",
+    "action": "write_off",
+    "payer_scope": "ppo",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": "Contractual Adj"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 2,
+   "kind": "rule",
+   "rule": {
+    "case": "patient_portion",
+    "action": "bill_patient",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 3,
+   "kind": "rule",
+   "rule": {
+    "case": "small_balance",
+    "action": "write_off",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": 10,
+    "adjustment_type": "Small Bal Adj"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 4,
+   "kind": "rule",
+   "rule": {
+    "case": "overpayment",
+    "action": "refund_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": "Refund Review"
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 5,
+   "kind": "rule",
+   "rule": {
+    "case": "denied_claim",
+    "action": "hold_for_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 6,
+   "kind": "question",
+   "rule": null,
+   "question_for_owner": "For Guardian, which balances does the doctor decide on (contractual difference, small balances, denials, or all of them), and until the doctor decides, should those balances be held for review rather than posted under the general rules?"
+  }
+ ]
+}

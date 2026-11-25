@@ -1,0 +1,14 @@
+{
+ "office": "CED",
+ "week": 8,
+ "facts_sha": "07c91b5d8433",
+ "note": "This week 96% of payment lines posted automatically, above our 90% target and up from 53% last week. Paper EOBs dropped to 0%, so nothing had to be keyed by hand and there is no backlog. The one thing left is 4 lines stuck because the payer paid below the contracted fee; we will check them against your contracted fees and send any real underpayments to your office manager for follow-up. Nothing is needed from you this week.",
+ "ungrounded": [],
+ "attempts": 1,
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1919,
+  "output_tokens": 484,
+  "seconds": 5.3
+ }
+}

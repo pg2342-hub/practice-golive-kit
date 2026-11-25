@@ -1,0 +1,14 @@
+{
+ "office": "BIR",
+ "week": 4,
+ "facts_sha": "c42bcfc81920",
+ "note": "Posting slipped this week: of 110 lines, 69 posted automatically, 11 were held and 30 got stuck, so the auto-post rate fell from 95% to 70%, below our 90% target. Most of the stuck lines are insurance deposits that reached your bank without the electronic payment details we need to match them to patients' claims. We are asking the insurance company for its current electronic payment ID so we can update your enrollment, and in the meantime we are matching the open deposits by hand. Nothing is piling up, with no backlog this week, and we don't need anything from you right now.",
+ "ungrounded": [],
+ "attempts": 1,
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1101,
+  "output_tokens": 432,
+  "seconds": 6.1
+ }
+}

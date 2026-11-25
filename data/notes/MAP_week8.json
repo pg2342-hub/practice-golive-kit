@@ -1,0 +1,14 @@
+{
+ "office": "MAP",
+ "week": 8,
+ "facts_sha": "4bed55d392a6",
+ "note": "Posting went well this week: the assistant's auto-post rate was 97%, above our 90% target. The exception backlog from last week, which had reached 4.3 hours with items waiting up to 10 days, is now fully cleared. Only 4 lines got stuck, and the most common reason is still claims paid below the contracted fee, so we will keep checking those against your fee schedules. To keep the backlog from building up again, please name a backup person who can work the exception queue when your main person is busy.",
+ "ungrounded": [],
+ "attempts": 1,
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1695,
+  "output_tokens": 438,
+  "seconds": 5.0
+ }
+}

@@ -1,0 +1,47 @@
+{
+ "office": "WIL",
+ "state": "as_received",
+ "run": 2,
+ "policy_sha": "80b40e742afc",
+ "policy": "1. We follow the same write-off rules as the other offices.\n2. Cigna claims denied for missing x-rays get resubmitted with the x-rays, never written off. Other denials also go to the office manager.\n3. Overpayments: INS REFUND, after the office manager reviews.",
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1637,
+  "output_tokens": 611,
+  "seconds": 5.6
+ },
+ "lines": [
+  {
+   "line": 1,
+   "kind": "question",
+   "rule": null,
+   "question_for_owner": "Willow was acquired this year and its policy just says to follow the other offices' rules. Which specific write-off rules (balance types, payers, dollar limits, adjustment types) should Willow use?"
+  },
+  {
+   "line": 2,
+   "kind": "rule",
+   "rule": {
+    "case": "denied_claim",
+    "action": "hold_for_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": null
+   },
+   "question_for_owner": null
+  },
+  {
+   "line": 3,
+   "kind": "rule",
+   "rule": {
+    "case": "overpayment",
+    "action": "refund_review",
+    "payer_scope": "all",
+    "payer_names": [],
+    "max_amount": null,
+    "adjustment_type": "INS REFUND"
+   },
+   "question_for_owner": null
+  }
+ ]
+}

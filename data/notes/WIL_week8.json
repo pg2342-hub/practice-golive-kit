@@ -1,0 +1,14 @@
+{
+ "office": "WIL",
+ "week": 8,
+ "facts_sha": "6b25269160c5",
+ "note": "Posting went well this week: 100% of lines posted automatically, above our 90% target, and no lines were stuck. The one thing that needs attention is the exception queue, which still has 2.3 hours of work waiting, and the oldest item has been sitting for 15 days. We will clear the oldest items first so nothing goes further out of date. To keep the queue from building up again, could you either set aside more weekly hours for it or name a backup person who can help work it?",
+ "ungrounded": [],
+ "attempts": 1,
+ "usage": {
+  "model": "claude-opus-5-5",
+  "input_tokens": 1829,
+  "output_tokens": 357,
+  "seconds": 5.8
+ }
+}
