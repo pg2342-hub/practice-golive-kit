@@ -1,5 +1,7 @@
 # practice-golive-kit
 
+[![tests](https://github.com/pg2342-hub/practice-golive-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/pg2342-hub/practice-golive-kit/actions/workflows/ci.yml)
+
 Demo page: https://pranavgudise.dev/practice-golive-kit/
 
 Getting a dental office live on an AI billing assistant comes down to two jobs. Before go-live, the office's payers, fee schedules, practice management system (PMS), and the office manager's write-off policy have to become posting rules that a machine can follow, and every gap has to land with the person who can fix it. After go-live, someone has to watch the first eight weeks closely enough to catch an account drifting before the owner notices.
